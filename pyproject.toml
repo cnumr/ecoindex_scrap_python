@@ -18,7 +18,7 @@ selenium = {version = "4.0.0b4", allow-prereleases = true}
 undetected-chromedriver = "3.0.3"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+pytest = "^7.1"
 black = {version = "^22.3.0", allow-prereleases = true}
 
 [build-system]
