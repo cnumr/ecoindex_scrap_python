@@ -1,7 +1,7 @@
 # ECOINDEX SCRAPER PYTHON
 
 ![Quality check](https://github.com/cnumr/ecoindex_scraper_python/workflows/Quality%20checks/badge.svg)
-[![PyPI version](https://badge.fury.io/py/ecoindex.svg)](https://badge.fury.io/py/ecoindex_scraper)
+[![PyPI version](https://badge.fury.io/py/ecoindex_scraper.svg)](https://badge.fury.io/py/ecoindex_scraper)
 
 This module provides a simple interface to get the [Ecoindex](http://www.ecoindex.fr) of a given webpage using module [ecoindex-python](https://pypi.org/project/ecoindex/)
 
