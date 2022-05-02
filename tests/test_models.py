@@ -1,4 +1,4 @@
-from ecoindex.models import Ecoindex, Page, Result
+from ecoindex_scraper.models import Page, Result
 from pydantic import ValidationError
 from pytest import raises
 
