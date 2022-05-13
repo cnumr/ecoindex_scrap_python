@@ -90,6 +90,9 @@ async def get_page_metrics(driver: Chrome) -> PageMetrics:
         outer_html=driver.execute_script("return document.documentElement.outerHTML"),
         nodes=driver.find_elements_by_xpath("//*"),
     )
+
+    nb_svg_children = await get_svg_children_count(driver=driver)
+
     downloaded_data = [
         loads(log["message"])["message"]["params"]["encodedDataLength"]
         for log in page.logs
@@ -98,17 +101,22 @@ async def get_page_metrics(driver: Chrome) -> PageMetrics:
 
     return PageMetrics(
         size=(sum(downloaded_data) + getsizeof(page.outer_html)) / (10**3),
-        nodes=len(page.nodes),
+        nodes=len(page.nodes) - nb_svg_children,
         requests=len(downloaded_data),
     )
 
 
 async def get_page_type(driver: Chrome) -> Optional[PageType]:
     try:
-        page_type = driver.find_element_by_xpath(
+        return driver.find_element_by_xpath(
             "//meta[@property='og:type']"
         ).get_attribute("content")
     except (NoSuchElementException):
-        page_type = None
+        return None
 
-    return page_type
+
+async def get_svg_children_count(driver: Chrome) -> int:
+    try:
+        return len(driver.find_elements_by_xpath("//*[local-name()='svg']/*"))
+    except (NoSuchElementException):
+        return 0
