@@ -88,7 +88,7 @@ async def get_page_metrics(driver: Chrome) -> PageMetrics:
     page = Page(
         logs=driver.get_log("performance"),
         outer_html=driver.execute_script("return document.documentElement.outerHTML"),
-        nodes=driver.find_elements_by_xpath("//*"),
+        nodes=driver.find_elements("xpath", "//*"),
     )
 
     nb_svg_children = await get_svg_children_count(driver=driver)
@@ -108,8 +108,8 @@ async def get_page_metrics(driver: Chrome) -> PageMetrics:
 
 async def get_page_type(driver: Chrome) -> Optional[PageType]:
     try:
-        return driver.find_element_by_xpath(
-            "//meta[@property='og:type']"
+        return driver.find_element(
+            "xpath", "//meta[@property='og:type']"
         ).get_attribute("content")
     except (NoSuchElementException):
         return None
@@ -117,6 +117,6 @@ async def get_page_type(driver: Chrome) -> Optional[PageType]:
 
 async def get_svg_children_count(driver: Chrome) -> int:
     try:
-        return len(driver.find_elements_by_xpath("//*[local-name()='svg']/*"))
+        return len(driver.find_element("xpath", "//*[local-name()='svg']/*"))
     except (NoSuchElementException):
         return 0
