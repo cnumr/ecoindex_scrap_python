@@ -100,7 +100,7 @@ async def get_page_metrics(driver: Chrome) -> PageMetrics:
     ]
 
     return PageMetrics(
-        size=(sum(downloaded_data) + getsizeof(page.outer_html)) / (10 ** 3),
+        size=(sum(downloaded_data) + getsizeof(page.outer_html)) / (10**3),
         nodes=len(page.nodes) - nb_svg_children,
         requests=len(downloaded_data),
     )
