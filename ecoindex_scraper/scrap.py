@@ -117,6 +117,6 @@ async def get_page_type(driver: Chrome) -> Optional[PageType]:
 
 async def get_svg_children_count(driver: Chrome) -> int:
     try:
-        return len(driver.find_element("xpath", "//*[local-name()='svg']/*"))
+        return len(driver.find_elements("xpath", "//*[local-name()='svg']/*"))
     except (NoSuchElementException):
         return 0
