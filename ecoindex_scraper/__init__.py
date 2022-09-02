@@ -1,1 +1,1 @@
-from .scrap import get_page_analysis
+from .scrap import EcoindexScraper
