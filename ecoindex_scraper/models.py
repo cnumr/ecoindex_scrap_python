@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import List, Optional
+from pathlib import Path
+from typing import Any, List, Optional
 
 from ecoindex.models import Ecoindex
 from pydantic import BaseModel
@@ -77,3 +78,16 @@ class Result(Ecoindex, PageMetrics, WebPage):
         title="Page type",
         description="Is the type of the page, based ton the [opengraph type tag](https://ogp.me/#types)",
     )
+
+
+class ScreenShot(BaseModel):
+    id: str
+    folder: str
+
+    def __init__(__pydantic_self__, **data: Any) -> None:
+        super().__init__(**data)
+        path = Path(__pydantic_self__.folder)
+        path.mkdir(parents=True, exist_ok=True)
+
+    def __str__(self) -> str:
+        return f"{self.folder}/{self.id}.png"

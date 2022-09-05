@@ -32,10 +32,9 @@ Example:
 import asyncio
 from pprint import pprint
 
-from ecoindex_scraper import get_page_analysis
+from ecoindex_scraper.scrap import EcoindexScraper
 
-page_analysis = asyncio.run(get_page_analysis(url="http://ecoindex.fr"))
-pprint(page_analysis)
+pprint(asyncio.run(EcoindexScraper(url="http://ecoindex.fr").get_page_analysis()))
 ```
 
 Result example:
@@ -50,6 +49,29 @@ Result(width=1920, height=1080, url=HttpUrl('http://ecoindex.fr', scheme='http',
 > - Wait for **1 second when page is loaded** (can be set with parameter `wait_before_scroll`)
 > - Scroll to the bottom of the page (if it is possible)
 > - Wait for **1 second after** having scrolled to the bottom of the page (can be set with parameter `wait_after_scroll`)
+
+### Get a page analysis and generate a screenshot
+
+It is possible to generate a screenshot of the analyzed page by adding a `ScreenShot` property to the `EcoindexScraper` object.
+You have to define an id (can be a string, but it is recommended to use a unique id) and a path to the screenshot file (if the folder does not exist, it will be created).
+
+```python
+import asyncio
+from pprint import pprint
+from uuid import uuid1
+
+from ecoindex_scraper.models import ScreenShot
+from ecoindex_scraper.scrap import EcoindexScraper
+
+pprint(
+    asyncio.run(
+        EcoindexScraper(
+            url="http://www.ecoindex.fr",
+            screenshot=ScreenShot(id=str(uuid1()), folder="./screenshots"),
+        ).get_page_analysis()
+    )
+)
+```
 
 ## Contribute
 
