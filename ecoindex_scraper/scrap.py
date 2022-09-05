@@ -109,7 +109,7 @@ class EcoindexScraper:
             outer_html=self.driver.execute_script(
                 "return document.documentElement.outerHTML"
             ),
-            nodes=self.driver.find_elements_by_xpath("//*"),
+            nodes=self.driver.find_elements("xpath", "//*"),
         )
 
         nb_svg_children = await self.get_svg_children_count()
@@ -128,14 +128,14 @@ class EcoindexScraper:
 
     async def get_page_type(self) -> Optional[PageType]:
         try:
-            return self.driver.find_element_by_xpath(
-                "//meta[@property='og:type']"
+            return self.driver.find_element(
+                "xpath", "//meta[@property='og:type']"
             ).get_attribute("content")
         except (NoSuchElementException):
             return None
 
     async def get_svg_children_count(self) -> int:
         try:
-            return len(self.driver.find_elements("//*[local-name()='svg']/*"))
+            return len(self.driver.find_elements("xpath", "//*[local-name()='svg']/*"))
         except (NoSuchElementException):
             return 0
