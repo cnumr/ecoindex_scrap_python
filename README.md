@@ -34,7 +34,13 @@ from pprint import pprint
 
 from ecoindex_scraper.scrap import EcoindexScraper
 
-pprint(asyncio.run(EcoindexScraper(url="http://ecoindex.fr").get_page_analysis()))
+pprint(
+    asyncio.run(
+        EcoindexScraper(url="http://ecoindex.fr")
+        .init_chromedriver()
+        .get_page_analysis()
+    )
+)
 ```
 
 Result example:
@@ -66,9 +72,11 @@ from ecoindex_scraper.scrap import EcoindexScraper
 pprint(
     asyncio.run(
         EcoindexScraper(
-            url="http://www.ecoindex.fr",
+            url="http://www.ecoindex.fr/",
             screenshot=ScreenShot(id=str(uuid1()), folder="./screenshots"),
-        ).get_page_analysis()
+        )
+        .init_chromedriver()
+        .get_page_analysis()
     )
 )
 ```
