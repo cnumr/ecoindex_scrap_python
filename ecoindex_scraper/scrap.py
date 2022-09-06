@@ -38,19 +38,24 @@ class EcoindexScraper:
         self.wait_after_scroll = wait_after_scroll
         self.screenshot = screenshot
 
-        chrome_options = uc.ChromeOptions()
-        chrome_options.headless = True
-        chrome_options.add_argument(f"--window-size={self.window_size}")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
+        self.chrome_options = uc.ChromeOptions()
+        self.chrome_options.headless = True
+        self.chrome_options.add_argument(f"--window-size={self.window_size}")
+        self.chrome_options.add_argument("--no-sandbox")
+        self.chrome_options.add_argument("--disable-dev-shm-usage")
 
-        capbs = DesiredCapabilities.CHROME.copy()
-        capbs["goog:loggingPrefs"] = {"performance": "ALL"}
-
-        self.driver = uc.Chrome(options=chrome_options, desired_capabilities=capbs)
+        self.capbs = DesiredCapabilities.CHROME.copy()
+        self.capbs["goog:loggingPrefs"] = {"performance": "ALL"}
 
     def __del__(self):
         self.driver.quit()
+
+    def init_chromedriver(self):
+        self.driver = uc.Chrome(
+            options=self.chrome_options, desired_capabilities=self.capbs
+        )
+
+        return self
 
     async def get_page_analysis(
         self,
