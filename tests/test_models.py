@@ -45,3 +45,4 @@ def test_result_model():
     assert result.score == 89
     assert result.ges == 1.22
     assert result.water == 1.89
+    assert result.ecoindex_version is not None
