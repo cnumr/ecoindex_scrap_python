@@ -19,6 +19,7 @@ from ecoindex_scraper.models import (
     ScreenShot,
     WindowSize,
 )
+from ecoindex_scraper.utils import convert_screenshot_to_webp
 
 
 class EcoindexScraper:
@@ -99,6 +100,7 @@ class EcoindexScraper:
     async def generate_screenshot(self) -> None:
         if self.screenshot and self.screenshot.folder and self.screenshot.id:
             self.driver.save_screenshot(self.screenshot.__str__())
+            convert_screenshot_to_webp(self.screenshot)
 
     async def scroll_to_bottom(self) -> None:
         try:
