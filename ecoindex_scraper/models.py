@@ -90,4 +90,10 @@ class ScreenShot(BaseModel):
         path.mkdir(parents=True, exist_ok=True)
 
     def __str__(self) -> str:
-        return f"{self.folder}/{self.id}.png"
+        return f"{self.folder}/{self.id}"
+
+    def get_png(self) -> str:
+        return f"{self.__str__()}.png"
+
+    def get_webp(self) -> str:
+        return f"{self.__str__()}.webp"

@@ -19,7 +19,7 @@ from ecoindex_scraper.models import (
     ScreenShot,
     WindowSize,
 )
-from ecoindex_scraper.utils import convert_screenshot_to_webp
+from ecoindex_scraper.utils import convert_screenshot_to_webp, set_screenshot_rights
 
 
 class EcoindexScraper:
@@ -30,6 +30,8 @@ class EcoindexScraper:
         wait_before_scroll: Optional[int] = 1,
         wait_after_scroll: Optional[int] = 1,
         screenshot: Optional[ScreenShot] = None,
+        screenshot_uid: Optional[int] = None,
+        screenshot_gid: Optional[int] = None,
     ):
         filterwarnings(action="ignore")
 
@@ -38,6 +40,8 @@ class EcoindexScraper:
         self.wait_before_scroll = wait_before_scroll
         self.wait_after_scroll = wait_after_scroll
         self.screenshot = screenshot
+        self.screenshot_uid = screenshot_uid
+        self.screenshot_gid = screenshot_gid
 
         self.chrome_options = uc.ChromeOptions()
         self.chrome_options.headless = True
@@ -99,8 +103,13 @@ class EcoindexScraper:
 
     async def generate_screenshot(self) -> None:
         if self.screenshot and self.screenshot.folder and self.screenshot.id:
-            self.driver.save_screenshot(self.screenshot.__str__())
+            self.driver.save_screenshot(self.screenshot.get_png())
             convert_screenshot_to_webp(self.screenshot)
+            set_screenshot_rights(
+                screenshot=self.screenshot,
+                uid=self.screenshot_uid,
+                gid=self.screenshot_gid,
+            )
 
     async def scroll_to_bottom(self) -> None:
         try:
