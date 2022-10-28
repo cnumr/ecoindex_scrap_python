@@ -2,7 +2,7 @@ from datetime import datetime
 from json import loads
 from sys import getsizeof
 from time import sleep
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 from warnings import filterwarnings
 
 import undetected_chromedriver.v2 as uc
@@ -12,7 +12,6 @@ from selenium.common.exceptions import JavascriptException, NoSuchElementExcepti
 from selenium.webdriver import DesiredCapabilities
 
 from ecoindex_scraper.models import (
-    Page,
     PageMetrics,
     PageType,
     Result,
@@ -121,27 +120,65 @@ class EcoindexScraper:
             pass
 
     async def get_page_metrics(self) -> PageMetrics:
-        page = Page(
-            logs=self.driver.get_log("performance"),
-            outer_html=self.driver.execute_script(
-                "return document.documentElement.outerHTML"
-            ),
-            nodes=self.driver.find_elements("xpath", "//*"),
+        outer_html = self.driver.execute_script(
+            "return document.documentElement.outerHTML"
         )
+        nodes = self.driver.find_elements("xpath", "//*")
 
         nb_svg_children = await self.get_svg_children_count()
-
-        downloaded_data = [
-            loads(log["message"])["message"]["params"]["encodedDataLength"]
-            for log in page.logs
-            if "INFO" == log["level"] and "Network.loadingFinished" in log["message"]
-        ]
+        downloaded_data = await self.parse_logs()
 
         return PageMetrics(
-            size=(sum(downloaded_data) + getsizeof(page.outer_html)) / (10**3),
-            nodes=len(page.nodes) - nb_svg_children,
+            size=(await self.get_page_size(downloaded_data, outer_html)),
+            nodes=(len(nodes) - nb_svg_children),
             requests=len(downloaded_data),
         )
+
+    @staticmethod
+    async def get_page_size(downloaded_data: List[int], outer_html: str) -> float:
+        result = (sum(downloaded_data) + getsizeof(outer_html)) / (10**3)
+
+        return result
+
+    async def parse_logs(self) -> List[int]:
+        downloaded_data = []
+        page_response = False
+
+        for log in self.driver.get_log("performance"):
+            message = loads(log["message"])
+
+            if (
+                "INFO" == log["level"]
+                and "Network.loadingFinished" == message["message"]["method"]
+            ):
+                downloaded_data.append(
+                    loads(log["message"])["message"]["params"]["encodedDataLength"]
+                )
+
+            if (
+                "INFO" == log["level"]
+                and "Network.responseReceived" == message["message"]["method"]
+                and not page_response
+            ):
+                page_response = True
+                response = message["message"]["params"]["response"]
+
+                if response["mimeType"] != "text/html":
+                    raise TypeError(
+                        {
+                            "message": "This resource is not a standard page with mimeType 'text/html'"
+                        }
+                    )
+
+                if response["status"] != 200:
+                    raise ConnectionError(
+                        {
+                            "status": response["status"],
+                            "message": "This page can not be analyzed because the response status code is not 200",
+                        }
+                    )
+
+        return downloaded_data
 
     async def get_page_type(self) -> Optional[PageType]:
         try:

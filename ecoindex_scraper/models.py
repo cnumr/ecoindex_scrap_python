@@ -10,12 +10,6 @@ from sqlmodel import Field, SQLModel
 PageType = str
 
 
-class Page(BaseModel):
-    logs: List
-    outer_html: str
-    nodes: List
-
-
 class PageMetrics(SQLModel):
     size: float = Field(
         default=...,

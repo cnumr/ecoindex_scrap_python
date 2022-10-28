@@ -1,25 +1,7 @@
-from ecoindex_scraper.models import Page, Result
-from pydantic import ValidationError
-from pytest import raises
+from os import rmdir
+from os.path import isdir
 
-
-def test_model_page():
-    logs = ["Logs of my page"]
-    outer_html = "Html of my page"
-    nodes = ["node1", "node2", "node3"]
-
-    page = Page(
-        logs=logs,
-        outer_html=outer_html,
-        nodes=nodes,
-    )
-
-    assert page.logs == logs
-    assert page.outer_html == outer_html
-    assert page.nodes == nodes
-
-    with raises(ValidationError):
-        Page(logs=logs)
+from ecoindex_scraper.models import Result, ScreenShot
 
 
 def test_result_model():
@@ -46,3 +28,19 @@ def test_result_model():
     assert result.ges == 1.22
     assert result.water == 1.89
     assert result.ecoindex_version is not None
+
+
+def test_screenshot_model():
+    id = "screenshot_test_id"
+    folder = "./screenshot_test"
+
+    screenshot = ScreenShot(id=id, folder=folder)
+
+    assert isdir(folder) == True
+    assert screenshot.id == id
+    assert screenshot.folder == folder
+    assert screenshot.get_png() == f"{folder}/{id}.png"
+    assert screenshot.get_webp() == f"{folder}/{id}.webp"
+
+    rmdir(folder)
+    assert isdir(folder) == False
