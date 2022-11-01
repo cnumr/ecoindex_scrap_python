@@ -2,7 +2,7 @@ from datetime import datetime
 from json import loads
 from sys import getsizeof
 from time import sleep
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 from warnings import filterwarnings
 
 import undetected_chromedriver.v2 as uc
@@ -25,12 +25,12 @@ class EcoindexScraper:
     def __init__(
         self,
         url: HttpUrl,
-        window_size: Optional[WindowSize] = WindowSize(width=1920, height=1080),
-        wait_before_scroll: Optional[int] = 1,
-        wait_after_scroll: Optional[int] = 1,
-        screenshot: Optional[ScreenShot] = None,
-        screenshot_uid: Optional[int] = None,
-        screenshot_gid: Optional[int] = None,
+        window_size: WindowSize | None = WindowSize(width=1920, height=1080),
+        wait_before_scroll: int | None = 1,
+        wait_after_scroll: int | None = 1,
+        screenshot: ScreenShot | None = None,
+        screenshot_uid: int | None = None,
+        screenshot_gid: int | None = None,
     ):
         filterwarnings(action="ignore")
 
@@ -182,7 +182,7 @@ class EcoindexScraper:
                 }
             )
 
-    async def get_page_type(self) -> Optional[PageType]:
+    async def get_page_type(self) -> PageType | None:
         try:
             return self.driver.find_element(
                 "xpath", "//meta[@property='og:type']"

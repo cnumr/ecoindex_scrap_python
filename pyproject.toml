@@ -12,7 +12,7 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 ecoindex = "^5.0.0"
 undetected-chromedriver = "^3.1.5"
 Pillow = "^9.2.0"
