@@ -1,5 +1,4 @@
 from os import chown, unlink
-from typing import Optional
 
 from PIL import Image
 
@@ -19,7 +18,7 @@ def convert_screenshot_to_webp(screenshot: ScreenShot) -> None:
 
 
 def set_screenshot_rights(
-    screenshot: ScreenShot, uid: Optional[int] = None, gid: Optional[int] = None
+    screenshot: ScreenShot, uid: int | None = None, gid: int | None = None
 ) -> None:
     if uid and gid:
         chown(path=screenshot.get_webp(), uid=uid, gid=gid)

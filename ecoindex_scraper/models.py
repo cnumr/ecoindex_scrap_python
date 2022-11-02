@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any
 
 from ecoindex.models import Ecoindex
 from pydantic import BaseModel
@@ -8,12 +8,6 @@ from pydantic.networks import HttpUrl
 from sqlmodel import Field, SQLModel
 
 PageType = str
-
-
-class Page(BaseModel):
-    logs: List
-    outer_html: str
-    nodes: List
 
 
 class PageMetrics(SQLModel):
@@ -54,26 +48,26 @@ class WindowSize(BaseModel):
 
 
 class WebPage(SQLModel):
-    width: Optional[int] = Field(
+    width: int | None = Field(
         default=None,
         title="Page Width",
         description="Width of the simulated window in pixel",
     )
-    height: Optional[int] = Field(
+    height: int | None = Field(
         default=None,
         title="Page Height",
         description="Height of the simulated window in pixel",
     )
-    url: Optional[HttpUrl] = Field(
+    url: HttpUrl | None = Field(
         default=None, title="Page url", description="Url of the analysed page"
     )
 
 
 class Result(Ecoindex, PageMetrics, WebPage):
-    date: Optional[datetime] = Field(
+    date: datetime | None = Field(
         default=None, title="Analysis datetime", description="Date of the analysis"
     )
-    page_type: Optional[PageType] = Field(
+    page_type: PageType | None = Field(
         default=None,
         title="Page type",
         description="Is the type of the page, based ton the [opengraph type tag](https://ogp.me/#types)",
