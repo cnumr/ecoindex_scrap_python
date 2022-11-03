@@ -34,7 +34,6 @@ mypy-extensions = ">=0.4.3"
 pathspec = ">=0.9.0"
 platformdirs = ">=2"
 tomli = {version = ">=1.1.0", markers = "python_full_version < \"3.11.0a7\""}
-typing-extensions = {version = ">=3.10.0.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
@@ -93,11 +92,11 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7
 
 [[package]]
 name = "ecoindex"
-version = "5.0.0"
+version = "5.1.0"
 description = "Ecoindex module provides a simple way to measure the Ecoindex score based on the 3 parameters: The DOM elements of the page, the size of the page and the number of external requests of the page"
 category = "main"
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = ">=3.10,<4.0"
 
 [package.dependencies]
 sqlmodel = ">=0.0.4,<0.0.8"
@@ -486,8 +485,8 @@ h11 = ">=0.9.0,<1"
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.8"
-content-hash = "ad5731f80b5b23a1b22e1888fc39ad74812bf4d759d9eae2da0aefcf3ed48a51"
+python-versions = "^3.10"
+content-hash = "49fe2493e9fdd4f8fc8f9eacf416e79a878c9134219c661d6df1f272ca767a71"
 
 [metadata.files]
 async-generator = [
@@ -604,8 +603,8 @@ colorama = [
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
 ecoindex = [
-    {file = "ecoindex-5.0.0-py3-none-any.whl", hash = "sha256:37248d207b9208c7eade4b63cf07f03e822e38311c1d9ce475bbd083c091dc40"},
-    {file = "ecoindex-5.0.0.tar.gz", hash = "sha256:c8a2d7a1779c4dc707589030f6912379c2b5eed9c51bdf2a61f6f98258f3aaa3"},
+    {file = "ecoindex-5.1.0-py3-none-any.whl", hash = "sha256:3ba25165d7440e43961b9986a6ad4701767c9597e9547e6801debe0fdb270b3d"},
+    {file = "ecoindex-5.1.0.tar.gz", hash = "sha256:f8ce1ccb479165e9f9cffe239a1103d9e7c74f69da6064e7adea949652d20dab"},
 ]
 exceptiongroup = [
     {file = "exceptiongroup-1.0.0-py3-none-any.whl", hash = "sha256:2ac84b496be68464a2da60da518af3785fff8b7ec0d090a581604bc870bdee41"},
