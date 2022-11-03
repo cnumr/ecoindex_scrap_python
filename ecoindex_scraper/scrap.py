@@ -170,7 +170,8 @@ class EcoindexScraper:
         if response["mimeType"] != "text/html":
             raise TypeError(
                 {
-                    "message": "This resource is not a standard page with mimeType 'text/html'"
+                    "mimetype": response["mimeType"],
+                    "message": "This resource is not a standard page with mimeType 'text/html'",
                 }
             )
 
