@@ -52,7 +52,7 @@ class EcoindexScraper:
         self.capbs["goog:loggingPrefs"] = {"performance": "ALL"}
 
     def __del__(self):
-        if self.driver:
+        if hasattr(self, "driver"):
             self.driver.quit()
 
     def init_chromedriver(self):
