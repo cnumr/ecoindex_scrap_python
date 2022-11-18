@@ -1,8 +1,7 @@
 from os import chown, unlink
 
+from ecoindex.models import ScreenShot
 from PIL import Image
-
-from ecoindex_scraper.models import ScreenShot
 
 
 def convert_screenshot_to_webp(screenshot: ScreenShot) -> None:
