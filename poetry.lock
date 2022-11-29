@@ -92,7 +92,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7
 
 [[package]]
 name = "ecoindex"
-version = "5.2.0b1"
+version = "5.3.0"
 description = "Ecoindex module provides a simple way to measure the Ecoindex score based on the 3 parameters: The DOM elements of the page, the size of the page and the number of external requests of the page"
 category = "main"
 optional = false
@@ -418,7 +418,7 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "e049c720c72250146b17b391def90eb5f23ebbb3d52ff29716425ee0e3b2390f"
+content-hash = "ff95ab3b7a4720798ee82a47e2f929804939890c93135fefaf9554f5ad553e2d"
 
 [metadata.files]
 async-generator = [
@@ -535,8 +535,8 @@ colorama = [
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
 ecoindex = [
-    {file = "ecoindex-5.2.0b1-py3-none-any.whl", hash = "sha256:4d4a596e7e23be9ec3832a37617434312ed220f3a5c290641d2ea4ab519c936e"},
-    {file = "ecoindex-5.2.0b1.tar.gz", hash = "sha256:3128fb6e6f51bdc0b0816640ff70889bd50a959308c88acf1df1861aa717a85b"},
+    {file = "ecoindex-5.3.0-py3-none-any.whl", hash = "sha256:7d00a9298b21adfd54150533b69ceca94fd8f8e3a0d35d75864c31e1a4ddc984"},
+    {file = "ecoindex-5.3.0.tar.gz", hash = "sha256:0df75a767dd6898b34fca7cdbf1548de98ebbe2e43be1d62b97b0009ea89ef71"},
 ]
 exceptiongroup = [
     {file = "exceptiongroup-1.0.4-py3-none-any.whl", hash = "sha256:542adf9dea4055530d6e1279602fa5cb11dab2395fa650b8674eaec35fc4a828"},
@@ -571,6 +571,8 @@ pathspec = [
     {file = "pathspec-0.10.2.tar.gz", hash = "sha256:8f6bf73e5758fd365ef5d58ce09ac7c27d2833a8d7da51712eac6e27e35141b0"},
 ]
 pillow = [
+    {file = "Pillow-9.3.0-1-cp37-cp37m-win32.whl", hash = "sha256:e6ea6b856a74d560d9326c0f5895ef8050126acfdc7ca08ad703eb0081e82b74"},
+    {file = "Pillow-9.3.0-1-cp37-cp37m-win_amd64.whl", hash = "sha256:32a44128c4bdca7f31de5be641187367fe2a450ad83b833ef78910397db491aa"},
     {file = "Pillow-9.3.0-cp310-cp310-macosx_10_10_x86_64.whl", hash = "sha256:0b7257127d646ff8676ec8a15520013a698d1fdc48bc2a79ba4e53df792526f2"},
     {file = "Pillow-9.3.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:b90f7616ea170e92820775ed47e136208e04c967271c9ef615b6fbd08d9af0e3"},
     {file = "Pillow-9.3.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:68943d632f1f9e3dce98908e873b3a090f6cba1cbb1b892a9e8d97c938871fbe"},
