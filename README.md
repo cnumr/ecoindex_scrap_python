@@ -66,7 +66,7 @@ import asyncio
 from pprint import pprint
 from uuid import uuid1
 
-from ecoindex_scraper.models import ScreenShot
+from ecoindex.models import ScreenShot
 from ecoindex_scraper.scrap import EcoindexScraper
 
 pprint(

@@ -7,17 +7,11 @@ from warnings import filterwarnings
 
 import undetected_chromedriver.v2 as uc
 from ecoindex.ecoindex import get_ecoindex
+from ecoindex.models import PageMetrics, PageType, Result, ScreenShot, WindowSize
 from pydantic.networks import HttpUrl
 from selenium.common.exceptions import JavascriptException, NoSuchElementException
 from selenium.webdriver import DesiredCapabilities
 
-from ecoindex_scraper.models import (
-    PageMetrics,
-    PageType,
-    Result,
-    ScreenShot,
-    WindowSize,
-)
 from ecoindex_scraper.utils import convert_screenshot_to_webp, set_screenshot_rights
 
 
