@@ -51,6 +51,7 @@ Result(width=1920, height=1080, url=HttpUrl('http://ecoindex.fr', ), size=549.25
 
 > **Default behaviour:** By default, the page analysis simulates:
 >
+> - Uses the last version of chrome (can be set with parameter `chrome_version_main` to a given version. IE `107`)
 > - Window size of **1920x1080** pixels (can be set with parameter `window_size`)
 > - Wait for **1 second when page is loaded** (can be set with parameter `wait_before_scroll`)
 > - Scroll to the bottom of the page (if it is possible)
