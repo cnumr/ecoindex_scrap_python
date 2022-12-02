@@ -19,6 +19,7 @@ class EcoindexScraper:
     def __init__(
         self,
         url: HttpUrl,
+        chrome_version_main: int | None = None,
         window_size: WindowSize | None = WindowSize(width=1920, height=1080),
         wait_before_scroll: int | None = 1,
         wait_after_scroll: int | None = 1,
@@ -35,6 +36,7 @@ class EcoindexScraper:
         self.screenshot = screenshot
         self.screenshot_uid = screenshot_uid
         self.screenshot_gid = screenshot_gid
+        self.chrome_version_main = chrome_version_main
 
         self.chrome_options = uc.ChromeOptions()
         self.chrome_options.headless = True
@@ -51,7 +53,9 @@ class EcoindexScraper:
 
     def init_chromedriver(self):
         self.driver = uc.Chrome(
-            options=self.chrome_options, desired_capabilities=self.capbs
+            options=self.chrome_options,
+            desired_capabilities=self.capbs,
+            version_main=self.chrome_version_main,
         )
 
         return self
