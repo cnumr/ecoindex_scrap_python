@@ -43,6 +43,7 @@ class EcoindexScraper:
         self.chrome_options.add_argument(f"--window-size={self.window_size}")
         self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
+        self.chrome_options.add_argument("--ignore-certificate-errors")
 
         self.capbs = DesiredCapabilities.CHROME.copy()
         self.capbs["goog:loggingPrefs"] = {"performance": "ALL"}
