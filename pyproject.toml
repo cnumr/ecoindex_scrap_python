@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ecoindex_scraper"
-version = "2.13.0"
+version = "2.13.1"
 description = "Ecoindex_scraper module provides a way to scrape data from given website while simulating a real web browser"
 authors = ["Vincent Vatelot <vincent.vatelot@ik.me>"]
 license = "MIT"
