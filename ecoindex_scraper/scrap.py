@@ -5,7 +5,7 @@ from time import sleep
 from typing import Dict, List, Tuple
 from warnings import filterwarnings
 
-import undetected_chromedriver.v2 as uc
+import d as uc
 from ecoindex.ecoindex import get_ecoindex
 from ecoindex.models import PageMetrics, PageType, Result, ScreenShot, WindowSize
 from pydantic.networks import HttpUrl
