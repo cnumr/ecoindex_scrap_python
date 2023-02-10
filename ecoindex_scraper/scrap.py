@@ -64,7 +64,12 @@ class EcoindexScraper:
     async def get_page_analysis(
         self,
     ) -> Result:
-        page_metrics, page_type = await self.scrap_page()
+        try:
+            page_metrics, page_type = await self.scrap_page()
+        except Exception as e:
+            self.__del__()
+            raise e
+
         ecoindex = await get_ecoindex(
             dom=page_metrics.nodes,
             size=page_metrics.size,
