@@ -14,7 +14,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.10"
 ecoindex = {version = "^5.4.1", allow-prereleases = true}
-undetected-chromedriver = "^3.1.6"
+undetected-chromedriver = "3.4.5"
 Pillow = "^9.2.0"
 
 [tool.poetry.dev-dependencies]
