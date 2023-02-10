@@ -5,7 +5,7 @@ from time import sleep
 from typing import Dict, List, Tuple
 from warnings import filterwarnings
 
-import undetected_chromedriver.v2 as uc
+import undetected_chromedriver as uc
 from ecoindex.ecoindex import get_ecoindex
 from ecoindex.models import PageMetrics, PageType, Result, ScreenShot, WindowSize
 from pydantic.networks import HttpUrl
@@ -141,22 +141,30 @@ class EcoindexScraper:
 
     async def parse_logs(self) -> List[int]:
         downloaded_data = []
+        requests_id = set()
         page_response = False
+        performance_logs = self.driver.get_log("performance")
 
-        for log in self.driver.get_log("performance"):
+        for log in performance_logs:
             message = loads(log["message"])
 
             if (
                 "INFO" == log["level"]
                 and "Network.responseReceived" == message["message"]["method"]
-                and not page_response
+                and message["message"]["params"]["response"]["url"].startswith("http")
             ):
-                page_response = True
-                await self.check_page_response(message["message"]["params"]["response"])
+                requests_id.add(message["message"]["params"]["requestId"])
+
+                if not page_response:
+                    page_response = True
+                    await self.check_page_response(
+                        message["message"]["params"]["response"]
+                    )
 
             if (
                 "INFO" == log["level"]
                 and "Network.loadingFinished" == message["message"]["method"]
+                and message["message"]["params"]["requestId"] in requests_id
             ):
                 downloaded_data.append(
                     loads(log["message"])["message"]["params"]["encodedDataLength"]
