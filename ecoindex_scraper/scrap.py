@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from json import loads
 from sys import getsizeof
@@ -37,6 +38,9 @@ class EcoindexScraper:
         self.screenshot_uid = screenshot_uid
         self.screenshot_gid = screenshot_gid
         self.chrome_version_main = chrome_version_main
+        self.requests_id = set()
+        self.page_response = False
+        self.downloaded_data = []
 
         self.chrome_options = uc.ChromeOptions()
         self.chrome_options.headless = True
@@ -45,9 +49,6 @@ class EcoindexScraper:
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--ignore-certificate-errors")
 
-        self.capbs = DesiredCapabilities.CHROME.copy()
-        self.capbs["goog:loggingPrefs"] = {"performance": "ALL"}
-
     def __del__(self):
         if hasattr(self, "driver"):
             self.driver.quit()
@@ -55,11 +56,31 @@ class EcoindexScraper:
     def init_chromedriver(self):
         self.driver = uc.Chrome(
             options=self.chrome_options,
-            desired_capabilities=self.capbs,
             version_main=self.chrome_version_main,
+            enable_cdp_events=True,
+        )
+
+        self.driver.add_cdp_listener(
+            "Network.responseReceived", self.handle_response_received
+        )
+
+        self.driver.add_cdp_listener(
+            "Network.loadingFinished", self.handle_loading_finished
         )
 
         return self
+
+    def handle_response_received(self, response: Dict) -> None:
+        if response["params"]["response"]["url"].startswith("http"):
+            self.requests_id.add(response["params"]["requestId"])
+
+            if not self.page_response:
+                self.page_response = True
+                self.check_page_response(response["params"]["response"])
+
+    def handle_loading_finished(self, response: Dict) -> None:
+        if response["params"]["requestId"] in self.requests_id:
+            self.downloaded_data.append(response["params"]["encodedDataLength"])
 
     async def get_page_analysis(
         self,
@@ -130,12 +151,11 @@ class EcoindexScraper:
         nodes = self.driver.find_elements("xpath", "//*")
 
         nb_svg_children = await self.get_svg_children_count()
-        downloaded_data = await self.parse_logs()
 
         return PageMetrics(
-            size=(await self.get_page_size(downloaded_data, outer_html)),
+            size=(await self.get_page_size(self.downloaded_data, outer_html)),
             nodes=(len(nodes) - nb_svg_children),
-            requests=len(downloaded_data),
+            requests=len(self.downloaded_data),
         )
 
     @staticmethod
@@ -144,41 +164,8 @@ class EcoindexScraper:
 
         return result
 
-    async def parse_logs(self) -> List[int]:
-        downloaded_data = []
-        requests_id = set()
-        page_response = False
-        performance_logs = self.driver.get_log("performance")
-
-        for log in performance_logs:
-            message = loads(log["message"])
-
-            if (
-                "INFO" == log["level"]
-                and "Network.responseReceived" == message["message"]["method"]
-                and message["message"]["params"]["response"]["url"].startswith("http")
-            ):
-                requests_id.add(message["message"]["params"]["requestId"])
-
-                if not page_response:
-                    page_response = True
-                    await self.check_page_response(
-                        message["message"]["params"]["response"]
-                    )
-
-            if (
-                "INFO" == log["level"]
-                and "Network.loadingFinished" == message["message"]["method"]
-                and message["message"]["params"]["requestId"] in requests_id
-            ):
-                downloaded_data.append(
-                    loads(log["message"])["message"]["params"]["encodedDataLength"]
-                )
-
-        return downloaded_data
-
     @staticmethod
-    async def check_page_response(response: Dict) -> None:
+    def check_page_response(response: Dict) -> None:
         if response["mimeType"] != "text/html":
             raise TypeError(
                 {
