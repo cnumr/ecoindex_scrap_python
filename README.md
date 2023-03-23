@@ -82,6 +82,51 @@ pprint(
 )
 ```
 
+## Async analysis
+
+You can also run the analysis asynchronously:
+
+```python
+import asyncio
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from chromedriver_py import binary_path
+
+from ecoindex_scraper.scrap import EcoindexScraper
+
+def run_page_analysis(url):
+    return asyncio.run(
+        EcoindexScraper(
+            url=url,
+            driver_executable_path=binary_path,
+        )
+        .init_chromedriver()
+        .get_page_analysis()
+    )
+
+
+with ThreadPoolExecutor(max_workers=8) as executor:
+    future_to_analysis = {}
+
+    url = "https://www.ecoindex.fr"
+
+    for i in range(10):
+        future_to_analysis[
+            executor.submit(
+                run_page_analysis,
+                url,
+            )
+        ] = (url)
+
+    for future in as_completed(future_to_analysis):
+        try:
+            print(future.result())
+        except Exception as e:
+            print(e)
+```
+
+> **Note:** In this case, it is highly recommanded to use `chromedriver_py` package to get the path to the chromedriver executable otherwise undetected-chromedriver is slow and have issues to access the chrome driver.
+
 ## Contribute
 
 You need [poetry](https://python-poetry.org/) to install and manage dependencies. Once poetry installed, run :
