@@ -27,6 +27,7 @@ class EcoindexScraper:
         screenshot: ScreenShot | None = None,
         screenshot_uid: int | None = None,
         screenshot_gid: int | None = None,
+        page_load_timeout: int | None = 20,
     ):
         filterwarnings(action="ignore")
 
@@ -39,6 +40,7 @@ class EcoindexScraper:
         self.screenshot_gid = screenshot_gid
         self.chrome_version_main = chrome_version_main
         self.driver_executable_path = driver_executable_path
+        self.page_load_timeout = page_load_timeout
 
         self.chrome_options = uc.ChromeOptions()
         self.chrome_options.headless = True
@@ -61,6 +63,8 @@ class EcoindexScraper:
             version_main=self.chrome_version_main,
             driver_executable_path=self.driver_executable_path,
         )
+
+        self.driver.set_page_load_timeout(self.page_load_timeout)
 
         return self
 
