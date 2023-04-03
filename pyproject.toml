@@ -16,6 +16,7 @@ python = "^3.10"
 ecoindex = {version = "^5.4.2", allow-prereleases = true}
 undetected-chromedriver = "3.4.6"
 Pillow = "^9.2.0"
+selenium = "^4.8.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2"

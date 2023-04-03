@@ -9,6 +9,7 @@ import undetected_chromedriver as uc
 from ecoindex.ecoindex import get_ecoindex
 from ecoindex.models import PageMetrics, PageType, Result, ScreenShot, WindowSize
 from pydantic.networks import HttpUrl
+from selenium import webdriver as selenium_webdriver
 from selenium.common.exceptions import JavascriptException, NoSuchElementException
 from selenium.webdriver import DesiredCapabilities
 
@@ -55,6 +56,17 @@ class EcoindexScraper:
     def __del__(self):
         if hasattr(self, "driver"):
             self.driver.quit()
+
+    def init_chromedriver_selenium(self):
+        self.driver = selenium_webdriver.Chrome(
+            options=self.chrome_options,
+            desired_capabilities=self.capbs,
+            executable_path=self.driver_executable_path,
+        )
+
+        self.driver.set_page_load_timeout(self.page_load_timeout)
+
+        return self
 
     def init_chromedriver(self):
         self.driver = uc.Chrome(
