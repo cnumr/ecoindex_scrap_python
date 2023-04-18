@@ -212,6 +212,6 @@ class EcoindexScraper:
 
     async def get_svg_children_count(self) -> int:
         try:
-            return len(self.driver.find_elements("xpath", "//*[local-name()='svg']/*"))
+            return len(self.driver.find_elements("xpath", "//*[local-name()='svg']//*"))
         except NoSuchElementException:
             return 0
