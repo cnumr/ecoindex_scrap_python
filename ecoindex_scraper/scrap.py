@@ -1,9 +1,7 @@
 from datetime import datetime
 from json import loads
-from sys import getsizeof
 from time import sleep
-from typing import Dict, List, Tuple
-from warnings import filterwarnings
+from typing import Dict, Tuple
 
 import undetected_chromedriver as uc
 from ecoindex.ecoindex import get_ecoindex
@@ -29,8 +27,6 @@ class EcoindexScraper:
         screenshot_gid: int | None = None,
         page_load_timeout: int = 20,
     ):
-        filterwarnings(action="ignore")
-
         self.url = url
         self.window_size = window_size
         self.wait_before_scroll = wait_before_scroll
@@ -136,29 +132,20 @@ class EcoindexScraper:
             pass
 
     async def get_page_metrics(self) -> PageMetrics:
-        outer_html = self.driver.execute_script(
-            "return document.documentElement.outerHTML"
-        )
         nodes = self.driver.find_elements("xpath", "//*")
-
         nb_svg_children = await self.get_svg_children_count()
-        downloaded_data = await self.parse_logs()
+        all_requests = await self.get_all_requests()
+
+        downloaded_data = [request["size"] for request in all_requests.values()]
 
         return PageMetrics(
-            size=(await self.get_page_size(downloaded_data, outer_html)),
+            size=sum(downloaded_data) / (10**3),
             nodes=(len(nodes) - nb_svg_children),
-            requests=len(downloaded_data),
+            requests=len(all_requests),
         )
 
-    @staticmethod
-    async def get_page_size(downloaded_data: List[int], outer_html: str) -> float:
-        result = (sum(downloaded_data) + getsizeof(outer_html)) / (10**3)
-
-        return result
-
-    async def parse_logs(self) -> List[int]:
-        downloaded_data = []
-        requests_id = set()
+    async def get_all_requests(self) -> Dict:
+        all_requests = {}
         page_response = False
         performance_logs = self.driver.get_log("performance")
 
@@ -170,7 +157,11 @@ class EcoindexScraper:
                 and "Network.responseReceived" == message["message"]["method"]
                 and message["message"]["params"]["response"]["url"].startswith("http")
             ):
-                requests_id.add(message["message"]["params"]["requestId"])
+                all_requests[message["message"]["params"]["requestId"]] = {
+                    "url": message["message"]["params"]["response"]["url"],
+                    "size": 0,
+                    "type": message["message"]["params"]["type"],
+                }
 
                 if not page_response:
                     page_response = True
@@ -180,14 +171,23 @@ class EcoindexScraper:
 
             if (
                 "INFO" == log["level"]
-                and "Network.loadingFinished" == message["message"]["method"]
-                and message["message"]["params"]["requestId"] in requests_id
+                and "Network.dataReceived" == message["message"]["method"]
+                and message["message"]["params"]["requestId"] in all_requests
             ):
-                downloaded_data.append(
-                    loads(log["message"])["message"]["params"]["encodedDataLength"]
-                )
+                all_requests[message["message"]["params"]["requestId"]][
+                    "size"
+                ] += message["message"]["params"]["encodedDataLength"]
 
-        return downloaded_data
+            if (
+                "INFO" == log["level"]
+                and "Network.loadingFinished" == message["message"]["method"]
+                and message["message"]["params"]["requestId"] in all_requests
+            ):
+                all_requests[message["message"]["params"]["requestId"]][
+                    "size"
+                ] = message["message"]["params"]["encodedDataLength"]
+
+        return all_requests
 
     @staticmethod
     async def check_page_response(response: Dict) -> None:
