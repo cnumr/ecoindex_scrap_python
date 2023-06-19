@@ -21,13 +21,13 @@ class EcoindexScraper:
         url: HttpUrl,
         chrome_version_main: int | None = None,
         driver_executable_path: str | None = None,
-        window_size: WindowSize | None = WindowSize(width=1920, height=1080),
-        wait_before_scroll: int | None = 1,
-        wait_after_scroll: int | None = 1,
+        window_size: WindowSize = WindowSize(width=1920, height=1080),
+        wait_before_scroll: float = 1,
+        wait_after_scroll: float = 1,
         screenshot: ScreenShot | None = None,
         screenshot_uid: int | None = None,
         screenshot_gid: int | None = None,
-        page_load_timeout: int | None = 20,
+        page_load_timeout: int = 20,
     ):
         filterwarnings(action="ignore")
 
@@ -50,7 +50,8 @@ class EcoindexScraper:
         self.chrome_options.add_argument("--ignore-certificate-errors")
 
         self.capbs = DesiredCapabilities.CHROME.copy()
-        self.capbs["goog:loggingPrefs"] = {"performance": "ALL"}
+
+        self.capbs["goog:loggingPrefs"] = {"performance": "ALL"}  # type: ignore
 
     def __del__(self):
         if hasattr(self, "driver"):
@@ -64,7 +65,8 @@ class EcoindexScraper:
             driver_executable_path=self.driver_executable_path,
         )
 
-        self.driver.set_page_load_timeout(self.page_load_timeout)
+        if self.page_load_timeout is not None:
+            self.driver.set_page_load_timeout(float(self.page_load_timeout))
 
         return self
 
@@ -97,7 +99,7 @@ class EcoindexScraper:
             page_type=page_type,
         )
 
-    async def scrap_page(self) -> Tuple[PageMetrics, PageType]:
+    async def scrap_page(self) -> Tuple[PageMetrics, PageType | None]:
         self.driver.set_script_timeout(10)
         self.driver.get(self.url)
         sleep(self.wait_before_scroll)
@@ -125,7 +127,10 @@ class EcoindexScraper:
     async def scroll_to_bottom(self) -> None:
         try:
             self.driver.execute_script(
-                "window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })"
+                (
+                    "window.scrollTo({ top: "
+                    "document.body.scrollHeight, behavior: 'smooth' })"
+                )
             )
         except JavascriptException:
             pass
@@ -190,7 +195,10 @@ class EcoindexScraper:
             raise TypeError(
                 {
                     "mimetype": response["mimeType"],
-                    "message": "This resource is not a standard page with mimeType 'text/html'",
+                    "message": (
+                        "This resource is not "
+                        "a standard page with mimeType 'text/html'"
+                    ),
                 }
             )
 
@@ -198,7 +206,10 @@ class EcoindexScraper:
             raise ConnectionError(
                 {
                     "status": response["status"],
-                    "message": "This page can not be analyzed because the response status code is not 200",
+                    "message": (
+                        "This page can not be analyzed "
+                        "because the response status code is not 200"
+                    ),
                 }
             )
 
