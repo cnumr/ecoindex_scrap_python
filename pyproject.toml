@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ecoindex_scraper"
-version = "2.18.0"
+version = "2.19.0a0"
 description = "Ecoindex_scraper module provides a way to scrape data from given website while simulating a real web browser"
 authors = ["Vincent Vatelot <vincent.vatelot@ik.me>"]
 license = "MIT"
@@ -14,7 +14,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.10"
 ecoindex = {version = "^5.4.2", allow-prereleases = true}
-undetected-chromedriver = "3.4.6"
+undetected-chromedriver = "3.4.7"
 Pillow = "^9.2.0"
 selenium = "4.9"
 

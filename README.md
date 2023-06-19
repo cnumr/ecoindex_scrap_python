@@ -90,16 +90,11 @@ You can also run the analysis asynchronously:
 import asyncio
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from chromedriver_py import binary_path
-
 from ecoindex_scraper.scrap import EcoindexScraper
 
 def run_page_analysis(url):
     return asyncio.run(
-        EcoindexScraper(
-            url=url,
-            driver_executable_path=binary_path,
-        )
+        EcoindexScraper(url=url)
         .init_chromedriver()
         .get_page_analysis()
     )
@@ -125,7 +120,7 @@ with ThreadPoolExecutor(max_workers=8) as executor:
             print(e)
 ```
 
-> **Note:** In this case, it is highly recommanded to use `chromedriver_py` package to get the path to the chromedriver executable otherwise undetected-chromedriver is slow and have issues to access the chrome driver.
+> **Note:** In this case, it is highly recommanded to use a fixed `chromedriver` version. You can set it with the parameter `chrome_version_main` (IE `107`) and `driver_executable_path` (IE `/usr/bin/chromedriver`). Otherwise undected-chromedriver will download the latest version of chromedriver and patch it for each analysis.
 
 ## Contribute
 
