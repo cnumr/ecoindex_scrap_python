@@ -1,7 +1,10 @@
 from datetime import datetime
 from json import loads
+from os import remove
+from shutil import copyfile
 from time import sleep
 from typing import Dict, Tuple
+from uuid import uuid4
 
 import undetected_chromedriver as uc
 from ecoindex.ecoindex import get_ecoindex
@@ -35,7 +38,6 @@ class EcoindexScraper:
         self.screenshot_uid = screenshot_uid
         self.screenshot_gid = screenshot_gid
         self.chrome_version_main = chrome_version_main
-        self.driver_executable_path = driver_executable_path
         self.page_load_timeout = page_load_timeout
 
         self.chrome_options = uc.ChromeOptions()
@@ -49,9 +51,18 @@ class EcoindexScraper:
 
         self.capbs["goog:loggingPrefs"] = {"performance": "ALL"}  # type: ignore
 
+        if driver_executable_path:
+            self.driver_executable_path = f"/tmp/chromedriver_{uuid4()}"
+            copyfile(driver_executable_path, self.driver_executable_path)
+        else:
+            self.driver_executable_path = None
+
     def __del__(self):
         if hasattr(self, "driver"):
             self.driver.quit()
+
+        if self.driver_executable_path:
+            remove(self.driver_executable_path)
 
     def init_chromedriver(self):
         self.driver = uc.Chrome(
