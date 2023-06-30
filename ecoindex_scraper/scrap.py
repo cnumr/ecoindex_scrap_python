@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+from genericpath import exists
 from os import remove
 from shutil import copyfile
 from time import sleep
@@ -40,11 +41,11 @@ class EcoindexScraper:
         self.page_load_timeout = page_load_timeout
 
         self.chrome_options = uc.ChromeOptions()
-        self.chrome_options.headless = True
         self.chrome_options.add_argument(f"--window-size={self.window_size}")
         self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--ignore-certificate-errors")
+        self.chrome_options.add_argument("--headless=new")
 
         self.all_requests = {}
         self.page_response = False
@@ -59,7 +60,7 @@ class EcoindexScraper:
         if hasattr(self, "driver"):
             self.driver.quit()
 
-        if self.driver_executable_path:
+        if self.driver_executable_path and exists(self.driver_executable_path):
             remove(self.driver_executable_path)
 
     def _handle_network_response_received(self, eventdata):
