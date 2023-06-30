@@ -1,5 +1,5 @@
+import asyncio
 from datetime import datetime
-from json import loads
 from os import remove
 from shutil import copyfile
 from time import sleep
@@ -11,7 +11,6 @@ from ecoindex.ecoindex import get_ecoindex
 from ecoindex.models import PageMetrics, PageType, Result, ScreenShot, WindowSize
 from pydantic.networks import HttpUrl
 from selenium.common.exceptions import JavascriptException, NoSuchElementException
-from selenium.webdriver import DesiredCapabilities
 
 from ecoindex_scraper.utils import convert_screenshot_to_webp, set_screenshot_rights
 
@@ -47,9 +46,8 @@ class EcoindexScraper:
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--ignore-certificate-errors")
 
-        self.capbs = DesiredCapabilities.CHROME.copy()
-
-        self.capbs["goog:loggingPrefs"] = {"performance": "ALL"}  # type: ignore
+        self.all_requests = {}
+        self.page_response = False
 
         if driver_executable_path:
             self.driver_executable_path = f"/tmp/chromedriver_{uuid4()}"
@@ -64,12 +62,46 @@ class EcoindexScraper:
         if self.driver_executable_path:
             remove(self.driver_executable_path)
 
+    def _handle_network_response_received(self, eventdata):
+        if eventdata["params"]["response"]["url"].startswith("http"):
+            self.all_requests[eventdata["params"]["requestId"]] = {
+                "url": eventdata["params"]["response"]["url"],
+                "size": 0,
+                "type": eventdata["params"]["type"],
+            }
+
+            if not self.page_response:
+                self.page_response = True
+                asyncio.run(self.check_page_response(eventdata["params"]["response"]))
+
+    def _handle_network_data_received(self, eventdata):
+        if eventdata["params"]["requestId"] in self.all_requests:
+            self.all_requests[eventdata["params"]["requestId"]]["size"] += eventdata[
+                "params"
+            ]["encodedDataLength"]
+
+    def _handle_network_loading_finished(self, eventdata):
+        if eventdata["params"]["requestId"] in self.all_requests:
+            self.all_requests[eventdata["params"]["requestId"]]["size"] = eventdata[
+                "params"
+            ]["encodedDataLength"]
+
     def init_chromedriver(self):
         self.driver = uc.Chrome(
             options=self.chrome_options,
-            desired_capabilities=self.capbs,
             version_main=self.chrome_version_main,
             driver_executable_path=self.driver_executable_path,
+            enable_cdp_events=True,
+        )
+
+        self.driver.add_cdp_listener(
+            "Network.dataReceived", self._handle_network_data_received
+        )
+        self.driver.add_cdp_listener(
+            "Network.responseReceived", self._handle_network_response_received
+        )
+        self.driver.add_cdp_listener(
+            "Network.loadingFinished", self._handle_network_loading_finished
         )
 
         if self.page_load_timeout is not None:
@@ -145,60 +177,14 @@ class EcoindexScraper:
     async def get_page_metrics(self) -> PageMetrics:
         nodes = self.driver.find_elements("xpath", "//*")
         nb_svg_children = await self.get_svg_children_count()
-        all_requests = await self.get_all_requests()
 
-        downloaded_data = [request["size"] for request in all_requests.values()]
+        downloaded_data = [request["size"] for request in self.all_requests.values()]
 
         return PageMetrics(
             size=sum(downloaded_data) / (10**3),
             nodes=(len(nodes) - nb_svg_children),
-            requests=len(all_requests),
+            requests=len(self.all_requests),
         )
-
-    async def get_all_requests(self) -> Dict:
-        all_requests = {}
-        page_response = False
-        performance_logs = self.driver.get_log("performance")
-
-        for log in performance_logs:
-            message = loads(log["message"])
-
-            if (
-                "INFO" == log["level"]
-                and "Network.responseReceived" == message["message"]["method"]
-                and message["message"]["params"]["response"]["url"].startswith("http")
-            ):
-                all_requests[message["message"]["params"]["requestId"]] = {
-                    "url": message["message"]["params"]["response"]["url"],
-                    "size": 0,
-                    "type": message["message"]["params"]["type"],
-                }
-
-                if not page_response:
-                    page_response = True
-                    await self.check_page_response(
-                        message["message"]["params"]["response"]
-                    )
-
-            if (
-                "INFO" == log["level"]
-                and "Network.dataReceived" == message["message"]["method"]
-                and message["message"]["params"]["requestId"] in all_requests
-            ):
-                all_requests[message["message"]["params"]["requestId"]][
-                    "size"
-                ] += message["message"]["params"]["encodedDataLength"]
-
-            if (
-                "INFO" == log["level"]
-                and "Network.loadingFinished" == message["message"]["method"]
-                and message["message"]["params"]["requestId"] in all_requests
-            ):
-                all_requests[message["message"]["params"]["requestId"]][
-                    "size"
-                ] = message["message"]["params"]["encodedDataLength"]
-
-        return all_requests
 
     @staticmethod
     async def check_page_response(response: Dict) -> None:
