@@ -15,7 +15,7 @@ include = [
 python = "^3.10"
 ecoindex = "^5.4.2"
 undetected-chromedriver = "3.5.0"
-Pillow = "^9.2.0"
+Pillow = ">=9.2,<11.0"
 selenium = "4.9"
 
 [tool.poetry.dev-dependencies]
