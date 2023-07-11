@@ -20,7 +20,7 @@ selenium = "4.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4"
-black = {version = "^23.3.0", allow-prereleases = true}
+black = {version = "^23.7.0", allow-prereleases = true}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
