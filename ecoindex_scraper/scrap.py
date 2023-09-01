@@ -1,7 +1,6 @@
 import asyncio
 from datetime import datetime
-from genericpath import exists
-from os import remove
+from os import chmod, remove
 from shutil import copyfile
 from time import sleep
 from typing import Dict, Tuple
@@ -10,6 +9,7 @@ from uuid import uuid4
 import undetected_chromedriver as uc
 from ecoindex.ecoindex import get_ecoindex
 from ecoindex.models import PageMetrics, PageType, Result, ScreenShot, WindowSize
+from genericpath import exists
 from pydantic.networks import HttpUrl
 from selenium.common.exceptions import JavascriptException, NoSuchElementException
 
@@ -53,15 +53,16 @@ class EcoindexScraper:
         if driver_executable_path:
             self.driver_executable_path = f"/tmp/chromedriver_{uuid4()}"
             copyfile(driver_executable_path, self.driver_executable_path)
+            chmod(self.driver_executable_path, 0o755)
         else:
             self.driver_executable_path = None
 
     def __del__(self):
-        if hasattr(self, "driver"):
-            self.driver.quit()
-
         if self.driver_executable_path and exists(self.driver_executable_path):
             remove(self.driver_executable_path)
+
+        if hasattr(self, "driver"):
+            self.driver.quit()
 
     def _handle_network_response_received(self, eventdata):
         if eventdata["params"]["response"]["url"].startswith("http"):
