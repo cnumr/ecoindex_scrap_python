@@ -22,6 +22,7 @@ class EcoindexScraper:
         url: HttpUrl,
         chrome_version_main: int | None = None,
         driver_executable_path: str | None = None,
+        chrome_executable_path: str | None = None,
         window_size: WindowSize = WindowSize(width=1920, height=1080),
         wait_before_scroll: float = 1,
         wait_after_scroll: float = 1,
@@ -38,6 +39,7 @@ class EcoindexScraper:
         self.screenshot_uid = screenshot_uid
         self.screenshot_gid = screenshot_gid
         self.chrome_version_main = chrome_version_main
+        self.chrome_executable_path = chrome_executable_path
         self.page_load_timeout = page_load_timeout
 
         self.chrome_options = uc.ChromeOptions()
@@ -93,6 +95,7 @@ class EcoindexScraper:
             options=self.chrome_options,
             version_main=self.chrome_version_main,
             driver_executable_path=self.driver_executable_path,
+            browser_executable_path=self.chrome_executable_path,
             enable_cdp_events=True,
         )
 

@@ -5,3 +5,4 @@ __pycache__
 !pyproject.toml
 !poetry.lock
 !README.md
+!scripts/download_chrome.py

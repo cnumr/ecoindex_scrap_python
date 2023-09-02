@@ -10,6 +10,7 @@ def run_page_analysis(url):
             EcoindexScraper(
                 url=url,
                 driver_executable_path="/usr/bin/chromedriver",
+                chrome_executable_path="/opt/chrome/chrome",
                 chrome_version_main=114,
             )
             .init_chromedriver()
@@ -27,7 +28,7 @@ with ThreadPoolExecutor(max_workers=8) as executor:
 
     url = "https://www.ecoindex.fr"
 
-    for i in range(10):
+    for i in range(20):
         future_to_analysis[
             executor.submit(
                 run_page_analysis,
