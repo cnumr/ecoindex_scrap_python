@@ -63,9 +63,6 @@ class EcoindexScraper:
         if self.driver_executable_path and exists(self.driver_executable_path):
             remove(self.driver_executable_path)
 
-        if hasattr(self, "driver"):
-            self.driver.quit()
-
     def _handle_network_response_received(self, eventdata):
         if eventdata["params"]["response"]["url"].startswith("http"):
             self.all_requests[eventdata["params"]["requestId"]] = {

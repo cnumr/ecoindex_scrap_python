@@ -45,11 +45,9 @@ RUN apt update && apt install -y ca-certificates fonts-liberation \
 COPY --from=requirements-stage /tmp/ /tmp/
 COPY --from=requirements-stage /tmp/chromedriver /usr/bin/chromedriver
 COPY --from=requirements-stage /tmp/chrome /opt/chrome
-
+RUN pip install -r /tmp/requirements.txt
 
 # Install google chrome and make chromedriver executable
 RUN chmod +x /usr/bin/chromedriver
 
 COPY ./ /code/
-
-RUN pip install -r /tmp/requirements.txt

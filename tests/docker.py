@@ -1,4 +1,5 @@
 import asyncio
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from ecoindex_scraper.scrap import EcoindexScraper
@@ -27,8 +28,13 @@ with ThreadPoolExecutor(max_workers=8) as executor:
     future_to_analysis = {}
 
     url = "https://www.ecoindex.fr"
+    nb_analysis = 40
 
-    for i in range(20):
+    print(f"Starting {nb_analysis} analysis")
+
+    start = time.time()
+
+    for i in range(nb_analysis):
         future_to_analysis[
             executor.submit(
                 run_page_analysis,
@@ -41,3 +47,7 @@ with ThreadPoolExecutor(max_workers=8) as executor:
             print(future.result())
         except Exception as e:
             print(e)
+
+    end = time.time()
+
+    print(f"Analysis took {end - start} seconds for {nb_analysis} analysis")
