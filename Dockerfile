@@ -1,9 +1,8 @@
 # Build image
 FROM python:3.11-slim AS requirements-stage
 
-ARG CHROME_VERSION_MAIN=107
+ARG CHROME_VERSION_MAIN=108
 ENV CHROME_VERSION_MAIN=${CHROME_VERSION_MAIN}
-ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
 
 WORKDIR /tmp
 
@@ -30,6 +29,7 @@ ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
 
 WORKDIR /code
 ENV PYTHONPATH "/code"
+ENV CHROME_EXECUTABLE_PATH "/opt/chrome/chrome"
 
 RUN apt update && apt install -y ca-certificates fonts-liberation \
     libappindicator3-1 libasound2 libatk-bridge2.0-0 \
@@ -43,13 +43,13 @@ RUN apt update && apt install -y ca-certificates fonts-liberation \
 
 # Copy requirements.txt, chromedriver, chrome from requirements-stage
 COPY --from=requirements-stage /tmp/ /tmp/
-COPY --from=requirements-stage /tmp/chromedriver /usr/bin/chromedriver
+COPY --from=requirements-stage /tmp/chromedriver ${CHROMEDRIVER_PATH}
 COPY --from=requirements-stage /tmp/chrome /opt/chrome
 
-
 # Install google chrome and make chromedriver executable
-RUN chmod +x /usr/bin/chromedriver
+RUN chmod +x ${CHROMEDRIVER_PATH}
+
+# Clean up
+RUN rm -rf /tmp/dist /var/lib/{apt,dpkg,cache,log}/
 
 COPY ./ /code/
-
-RUN pip install -r /tmp/requirements.txt

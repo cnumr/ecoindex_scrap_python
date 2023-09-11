@@ -1,5 +1,5 @@
-import asyncio
 from datetime import datetime
+from json import loads
 from os import chmod, remove
 from shutil import copyfile
 from time import sleep
@@ -12,6 +12,7 @@ from ecoindex.models import PageMetrics, PageType, Result, ScreenShot, WindowSiz
 from genericpath import exists
 from pydantic.networks import HttpUrl
 from selenium.common.exceptions import JavascriptException, NoSuchElementException
+from selenium.webdriver import DesiredCapabilities
 
 from ecoindex_scraper.utils import convert_screenshot_to_webp, set_screenshot_rights
 
@@ -43,11 +44,16 @@ class EcoindexScraper:
         self.page_load_timeout = page_load_timeout
 
         self.chrome_options = uc.ChromeOptions()
+        self.chrome_options.headless = True
         self.chrome_options.add_argument(f"--window-size={self.window_size}")
         self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--ignore-certificate-errors")
         self.chrome_options.add_argument("--headless=new")
+
+        self.capbs = DesiredCapabilities.CHROME.copy()
+
+        self.capbs["goog:loggingPrefs"] = {"performance": "ALL"}  # type: ignore
 
         self.all_requests = {}
         self.page_response = False
@@ -63,85 +69,52 @@ class EcoindexScraper:
         if self.driver_executable_path and exists(self.driver_executable_path):
             remove(self.driver_executable_path)
 
-        if hasattr(self, "driver"):
-            self.driver.quit()
-
-    def _handle_network_response_received(self, eventdata):
-        if eventdata["params"]["response"]["url"].startswith("http"):
-            self.all_requests[eventdata["params"]["requestId"]] = {
-                "url": eventdata["params"]["response"]["url"],
-                "size": 0,
-                "type": eventdata["params"]["type"],
-            }
-
-            if not self.page_response:
-                self.page_response = True
-                asyncio.run(self.check_page_response(eventdata["params"]["response"]))
-
-    def _handle_network_data_received(self, eventdata):
-        if eventdata["params"]["requestId"] in self.all_requests:
-            self.all_requests[eventdata["params"]["requestId"]]["size"] += eventdata[
-                "params"
-            ]["encodedDataLength"]
-
-    def _handle_network_loading_finished(self, eventdata):
-        if eventdata["params"]["requestId"] in self.all_requests:
-            self.all_requests[eventdata["params"]["requestId"]]["size"] = eventdata[
-                "params"
-            ]["encodedDataLength"]
-
     def init_chromedriver(self):
-        self.driver = uc.Chrome(
-            options=self.chrome_options,
-            version_main=self.chrome_version_main,
-            driver_executable_path=self.driver_executable_path,
-            browser_executable_path=self.chrome_executable_path,
-            enable_cdp_events=True,
-        )
+        try:
+            self.driver = uc.Chrome(
+                options=self.chrome_options,
+                desired_capabilities=self.capbs,
+                version_main=self.chrome_version_main,
+                driver_executable_path=self.driver_executable_path,
+                browser_executable_path=self.chrome_executable_path,
+            )
 
-        self.driver.add_cdp_listener(
-            "Network.dataReceived", self._handle_network_data_received
-        )
-        self.driver.add_cdp_listener(
-            "Network.responseReceived", self._handle_network_response_received
-        )
-        self.driver.add_cdp_listener(
-            "Network.loadingFinished", self._handle_network_loading_finished
-        )
+            if self.page_load_timeout is not None:
+                self.driver.set_page_load_timeout(float(self.page_load_timeout))
 
-        if self.page_load_timeout is not None:
-            self.driver.set_page_load_timeout(float(self.page_load_timeout))
-
-        return self
+            return self
+        except Exception as e:
+            self.__del__()
+            raise e
 
     async def get_page_analysis(
         self,
     ) -> Result:
         try:
             page_metrics, page_type = await self.scrap_page()
+            ecoindex = await get_ecoindex(
+                dom=page_metrics.nodes,
+                size=page_metrics.size,
+                requests=page_metrics.requests,
+            )
+
+            return Result(
+                score=ecoindex.score,
+                ges=ecoindex.ges,
+                water=ecoindex.water,
+                grade=ecoindex.grade,
+                url=self.url,
+                date=datetime.now(),
+                width=self.window_size.width,
+                height=self.window_size.height,
+                nodes=page_metrics.nodes,
+                size=page_metrics.size,
+                requests=page_metrics.requests,
+                page_type=page_type,
+            )
         except Exception as e:
             self.__del__()
             raise e
-
-        ecoindex = await get_ecoindex(
-            dom=page_metrics.nodes,
-            size=page_metrics.size,
-            requests=page_metrics.requests,
-        )
-        return Result(
-            score=ecoindex.score,
-            ges=ecoindex.ges,
-            water=ecoindex.water,
-            grade=ecoindex.grade,
-            url=self.url,
-            date=datetime.now(),
-            width=self.window_size.width,
-            height=self.window_size.height,
-            nodes=page_metrics.nodes,
-            size=page_metrics.size,
-            requests=page_metrics.requests,
-            page_type=page_type,
-        )
 
     async def scrap_page(self) -> Tuple[PageMetrics, PageType | None]:
         self.driver.set_script_timeout(10)
@@ -182,6 +155,7 @@ class EcoindexScraper:
     async def get_page_metrics(self) -> PageMetrics:
         nodes = self.driver.find_elements("xpath", "//*")
         nb_svg_children = await self.get_svg_children_count()
+        await self.get_all_requests()
 
         downloaded_data = [request["size"] for request in self.all_requests.values()]
 
@@ -190,6 +164,47 @@ class EcoindexScraper:
             nodes=(len(nodes) - nb_svg_children),
             requests=len(self.all_requests),
         )
+
+    async def get_all_requests(self) -> None:
+        performance_logs = self.driver.get_log("performance")
+
+        for log in performance_logs:
+            message = loads(log["message"])
+
+            if (
+                "INFO" == log["level"]
+                and "Network.responseReceived" == message["message"]["method"]
+                and message["message"]["params"]["response"]["url"].startswith("http")
+            ):
+                self.all_requests[message["message"]["params"]["requestId"]] = {
+                    "url": message["message"]["params"]["response"]["url"],
+                    "size": 0,
+                    "type": message["message"]["params"]["type"],
+                }
+
+                if not self.page_response:
+                    self.page_response = True
+                    await self.check_page_response(
+                        message["message"]["params"]["response"]
+                    )
+
+            if (
+                "INFO" == log["level"]
+                and "Network.dataReceived" == message["message"]["method"]
+                and message["message"]["params"]["requestId"] in self.all_requests
+            ):
+                self.all_requests[message["message"]["params"]["requestId"]][
+                    "size"
+                ] += message["message"]["params"]["encodedDataLength"]
+
+            if (
+                "INFO" == log["level"]
+                and "Network.loadingFinished" == message["message"]["method"]
+                and message["message"]["params"]["requestId"] in self.all_requests
+            ):
+                self.all_requests[message["message"]["params"]["requestId"]][
+                    "size"
+                ] = message["message"]["params"]["encodedDataLength"]
 
     @staticmethod
     async def check_page_response(response: Dict) -> None:
