@@ -48,6 +48,7 @@ COPY --from=requirements-stage /tmp/chrome /opt/chrome
 
 # Install google chrome and make chromedriver executable
 RUN chmod +x ${CHROMEDRIVER_PATH}
+RUN pip install -r /tmp/requirements.txt
 
 # Clean up
 RUN rm -rf /tmp/dist /var/lib/{apt,dpkg,cache,log}/

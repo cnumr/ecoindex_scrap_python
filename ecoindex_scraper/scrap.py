@@ -1,15 +1,11 @@
 from datetime import datetime
 from json import loads
-from os import chmod, remove
-from shutil import copyfile
 from time import sleep
 from typing import Dict, Tuple
-from uuid import uuid4
 
 import undetected_chromedriver as uc
 from ecoindex.ecoindex import get_ecoindex
 from ecoindex.models import PageMetrics, PageType, Result, ScreenShot, WindowSize
-from genericpath import exists
 from pydantic.networks import HttpUrl
 from selenium.common.exceptions import JavascriptException, NoSuchElementException
 from selenium.webdriver import DesiredCapabilities
@@ -57,64 +53,48 @@ class EcoindexScraper:
 
         self.all_requests = {}
         self.page_response = False
-
-        if driver_executable_path:
-            self.driver_executable_path = f"/tmp/chromedriver_{uuid4()}"
-            copyfile(driver_executable_path, self.driver_executable_path)
-            chmod(self.driver_executable_path, 0o755)
-        else:
-            self.driver_executable_path = None
-
-    def __del__(self):
-        if self.driver_executable_path and exists(self.driver_executable_path):
-            remove(self.driver_executable_path)
+        self.driver_executable_path = driver_executable_path
 
     def init_chromedriver(self):
-        try:
-            self.driver = uc.Chrome(
-                options=self.chrome_options,
-                desired_capabilities=self.capbs,
-                version_main=self.chrome_version_main,
-                driver_executable_path=self.driver_executable_path,
-                browser_executable_path=self.chrome_executable_path,
-            )
+        self.driver = uc.Chrome(
+            options=self.chrome_options,
+            desired_capabilities=self.capbs,
+            version_main=self.chrome_version_main,
+            driver_executable_path=self.driver_executable_path,
+            browser_executable_path=self.chrome_executable_path,
+            user_multi_procs=True,
+            use_subprocess=False,
+        )
 
-            if self.page_load_timeout is not None:
-                self.driver.set_page_load_timeout(float(self.page_load_timeout))
+        if self.page_load_timeout is not None:
+            self.driver.set_page_load_timeout(float(self.page_load_timeout))
 
-            return self
-        except Exception as e:
-            self.__del__()
-            raise e
+        return self
 
     async def get_page_analysis(
         self,
     ) -> Result:
-        try:
-            page_metrics, page_type = await self.scrap_page()
-            ecoindex = await get_ecoindex(
-                dom=page_metrics.nodes,
-                size=page_metrics.size,
-                requests=page_metrics.requests,
-            )
+        page_metrics, page_type = await self.scrap_page()
+        ecoindex = await get_ecoindex(
+            dom=page_metrics.nodes,
+            size=page_metrics.size,
+            requests=page_metrics.requests,
+        )
 
-            return Result(
-                score=ecoindex.score,
-                ges=ecoindex.ges,
-                water=ecoindex.water,
-                grade=ecoindex.grade,
-                url=self.url,
-                date=datetime.now(),
-                width=self.window_size.width,
-                height=self.window_size.height,
-                nodes=page_metrics.nodes,
-                size=page_metrics.size,
-                requests=page_metrics.requests,
-                page_type=page_type,
-            )
-        except Exception as e:
-            self.__del__()
-            raise e
+        return Result(
+            score=ecoindex.score,
+            ges=ecoindex.ges,
+            water=ecoindex.water,
+            grade=ecoindex.grade,
+            url=self.url,
+            date=datetime.now(),
+            width=self.window_size.width,
+            height=self.window_size.height,
+            nodes=page_metrics.nodes,
+            size=page_metrics.size,
+            requests=page_metrics.requests,
+            page_type=page_type,
+        )
 
     async def scrap_page(self) -> Tuple[PageMetrics, PageType | None]:
         self.driver.set_script_timeout(10)

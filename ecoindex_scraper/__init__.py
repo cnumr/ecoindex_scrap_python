@@ -1,1 +1,1 @@
-from .scrap import EcoindexScraper
+from .scrap import EcoindexScraper  # noqa: F401
