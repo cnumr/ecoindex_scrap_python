@@ -16,7 +16,7 @@ python = "^3.10"
 ecoindex = "^5.4.2"
 undetected-chromedriver = "3.4.7"
 Pillow = ">=9.2,<11.0"
-selenium = "4.9"
+selenium = "4.14.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4"
