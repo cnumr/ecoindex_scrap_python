@@ -751,17 +751,17 @@ files = [
 
 [[package]]
 name = "undetected-chromedriver"
-version = "3.4.7"
+version = "3.5.4"
 description = "('Selenium.webdriver.Chrome replacement with compatiblity for Brave, and other Chromium based browsers.', 'Not triggered by CloudFlare/Imperva/hCaptcha and such.', 'NOTE: results may vary due to many factors. No guarantees are given, except for ongoing efforts in understanding detection algorithms.')"
 optional = false
 python-versions = "*"
 files = [
-    {file = "undetected-chromedriver-3.4.7.tar.gz", hash = "sha256:84aed43e12e99437cc3a6f0a284cefdac8724c85f526a950c4f650515dfc4b66"},
+    {file = "undetected-chromedriver-3.5.4.tar.gz", hash = "sha256:95efdd879ddf8f2a2eff6919fa318cd34c080bd07fb81ae0cdb7949c0142a258"},
 ]
 
 [package.dependencies]
 requests = "*"
-selenium = ">=4.0.0"
+selenium = ">=4.9.0"
 websockets = "*"
 
 [[package]]
@@ -879,4 +879,4 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "b1f4cd69a7b1fddbc0c065c2eb99d0ce62684572f07442477c3b4404596a1449"
+content-hash = "f10f0789cc77dd7d3d969c512461842667cbfabf18acdd25faea1e0e8234e900"
